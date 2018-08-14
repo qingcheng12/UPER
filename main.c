@@ -34,13 +34,6 @@ typedef struct _SpatMsg {
 	long	 pading;
 } SpatMsg;
 
-typedef struct DTLSocket
-{
-	struct sockaddr_in adr_inet;
-
-	// DTL udp socket
-	int DTLFd;
-}tDTLSocket;
 
 
 // local udp socket
@@ -72,38 +65,6 @@ int main()
 	int option = 1; // 设置socket ip地址可复用
 //	int so_broadcast = 1; //设置socket为广播模式
 
-	/* 创建socket  */
-	if( ( sockFd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 )
-		ERR_EXIT("socket");
-	printf("sockFd = %d\n", sockFd);
-
-	/* 设置地址可复用 */
-	if( setsockopt(sockFd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) ) < 0)
-		ERR_EXIT("setsockopt");
-
-	/* 初始化本地ip地址*/
-	bzero(&addr_local, sizeof(addr_local));
-	addr_local.sin_family = AF_INET;
-	addr_local.sin_addr.s_addr = inet_addr("127.0.0.1");
-	addr_local.sin_port = htons(5003);
-//	addr_local.sin_addr.s_addr = htonl(INADDR_ANY);
-
-	/* 绑定udp socket和服务器ip地址*/
-	if(bind(sockFd, (struct sockaddr*)&addr_local, sizeof(addr_local)) < 0)
-		ERR_EXIT("bind");
-
-	// 1.0 建立socket
-	if((DTL.DTLFd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-	{
-		perror("socket error");
-		exit(1);
-	}
-
-	// 2.0 set ip_addr
-	DTL.adr_inet.sin_family = AF_INET;
-	DTL.adr_inet.sin_port = htons(5003);
-	DTL.adr_inet.sin_addr.s_addr = inet_addr("192.168.1.80");
-
 	// 填充信号灯消息
 	SpatMsg *msg;
 
@@ -112,15 +73,6 @@ int main()
 
 	// 接收信息解析
 	char  recvBuf[MAXLEN_256];
-	socklen_t len = sizeof(addr_Client);
-	while(1)
-	{
-		// 通过LTE-V接收
-		bzero(recvBuf, MAXLEN_256);
-		recvfrom(sockFd, recvBuf, MAXLEN_256, 0, (struct sockaddr*)&addr_Client, &len);
-
-		Decode_Receive(recvBuf);
-	}
 
     return 0;
 }
@@ -172,13 +124,9 @@ void Encode_Msg(SpatMsg *spatmsg)
 
 
     /* Also print the constructed Rectangle XER encoded (XML) */
-    xer_fprint(stdout, &asn_DEF_Msg, msg);
-
-    // 通过LTE-V发送
-    int ret = sendto(DTL.DTLFd, msg, 64, 0, (struct sockaddr*)&DTL.adr_inet,sizeof(DTL.adr_inet));
-	if (ret > 0) {
-		printf("DTL send  MAP success! ret = %d\n", ret);
-	}
+    xer_fprint(stdout, &asn_DEF_Msg, msg)；
+	    
+   Decode_Receive(sendbuf);
 
 
 }
