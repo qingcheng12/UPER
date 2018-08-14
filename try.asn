@@ -1,0 +1,11 @@
+MsgTest DEFINITIONS ::=BEGIN
+    Msg ::= SEQUENCE{
+	length INTEGER,
+        latitude INTEGER,        -- Height of the rectangle
+        longitude INTEGER,        -- Width of the rectangle
+	heading INTEGER,
+	state INTEGER,
+	time INTEGER,
+	pading INTEGER
+    }
+END
